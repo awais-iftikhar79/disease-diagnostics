@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Force the outer browser container to be the sole owner of scrolling */
+html {
+  scroll-behavior: smooth;
+  overflow-y: scroll !important;
+  /* Single primary scroll track fixed */
+  overflow-x: hidden;
+  background-color: #060b13;
+}
+
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  overflow: visible !important;
+  background-color: #060b13;
+}
+
+/* Premium scrollbar aesthetic matching your theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #060b13;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}

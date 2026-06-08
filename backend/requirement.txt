@@ -1,0 +1,12 @@
+# Web Framework & API Server
+fastapi
+uvicorn
+pydantic
+
+# Machine Learning Core
+numpy
+pandas
+scikit-learn
+xgboost
+tensorflow
+joblib
