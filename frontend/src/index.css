@@ -8,7 +8,7 @@ html {
   overflow-y: scroll !important;
   /* Single primary scroll track fixed */
   overflow-x: hidden;
-  background-color: #060b13;
+  background-color: #f8fafc;
 }
 
 body,
@@ -18,7 +18,7 @@ body,
   width: 100%;
   min-height: 100vh;
   overflow: visible !important;
-  background-color: #060b13;
+  background-color: #f8fafc;
 }
 
 /* Premium scrollbar aesthetic matching your theme */
@@ -27,14 +27,14 @@ body,
 }
 
 ::-webkit-scrollbar-track {
-  background: #060b13;
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #94a3b8;
 }
