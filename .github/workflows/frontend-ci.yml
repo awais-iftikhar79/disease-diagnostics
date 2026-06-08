@@ -1,0 +1,43 @@
+name: Frontend Visual Validation CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  test:
+    name: Build & Visual Capture Test
+    runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright OS dependencies
+        run: npx playwright install-deps
+
+      - name: Build frontend static assets
+        run: npm run build
+
+      - name: Run visual validation capture
+        run: npm run capture

@@ -10,3 +10,7 @@ scikit-learn
 xgboost
 tensorflow
 joblib
+
+# Testing
+pytest
+httpx
