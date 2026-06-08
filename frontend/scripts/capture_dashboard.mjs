@@ -1,12 +1,11 @@
 import http from "node:http";
-import { mkdir, readFile, stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { dirname, extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 const PROJECT_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const SITE_ROOT = join(PROJECT_ROOT, "dist"); // Verified Vite production distribution folder
-const OUT_DIR = join(PROJECT_ROOT, ".screenshots");
+const SITE_ROOT = join(PROJECT_ROOT, "dist"); // Hosts Vite's compiled distribution folder
 const PORT = 4399;
 
 const VIEWPORTS = [
@@ -27,13 +26,12 @@ async function resolveFile(requestPath) {
         try {
             if ((await stat(candidate)).isFile()) return candidate;
         } catch {
-            // Continue resolving
+            // Continue resolution loops
         }
     }
     return null;
 }
 
-// Spin up a localized server hosting Vite's compiled production build
 async function startServer() {
     try {
         await stat(join(SITE_ROOT, "index.html"));
@@ -64,34 +62,44 @@ async function startServer() {
     return server;
 }
 
-async function capturePdf(page, viewport, file) {
-    await page.emulateMedia({ media: "screen" });
+// Converts screenshot buffer to an immediate console log stream that Antigravity reads
+async function feedImageToAgent(page, description) {
+    // Freeze animations before taking the visual snapshot
     await page.addStyleTag({
-        content: `
-      *, *::before, *::after { animation: none !important; transition: none !important; }
-      .animate-fadeIn { opacity: 1 !important; transform: none !important; }
-    `,
+        content: `*, *::before, *::after { animation: none !important; transition: none !important; }`
     });
-    await page.waitForTimeout(100);
-    const height = Math.ceil(await page.evaluate(() => document.documentElement.scrollHeight));
-    await page.pdf({
-        path: file,
-        width: `${viewport.width}px`,
-        height: `${height}px`,
-        printBackground: true,
-        pageRanges: "1",
+    const buffer = await page.screenshot({ fullPage: true });
+    const base64Image = buffer.toString("base64");
+    console.log(`\n=== BEGIN_ANTIGRAVITY_IMAGE_FEED: ${description} ===`);
+    console.log(`data:image/png;base64,${base64Image}`);
+    console.log(`=== END_ANTIGRAVITY_IMAGE_FEED ===\n`);
+}
+
+// Simulates human scrolling so the agent can inspect fields down the page
+async function smoothlyScrollPage(page) {
+    await page.evaluate(async () => {
+        await new Promise((resolve) => {
+            let totalHeight = 0;
+            const distance = 250;
+            const timer = setInterval(() => {
+                const scrollHeight = document.documentElement.scrollHeight;
+                window.scrollBy(0, distance);
+                totalHeight += distance;
+                if (totalHeight >= scrollHeight) {
+                    clearInterval(timer);
+                    resolve();
+                }
+            }, 100);
+        });
     });
+    await page.waitForTimeout(200);
 }
 
 async function main() {
-    await mkdir(OUT_DIR, { recursive: true });
     const server = await startServer();
-    const browser = await chromium.launch({
-        channel: 'chrome' // Tells Playwright to launch your Ubuntu system Google Chrome
-    });
+    const browser = await chromium.launch({ channel: 'chrome' }); // Uses your native Ubuntu Chrome installation
 
-    console.log(`\n🚀 UI Automation Server initialized at http://localhost:${PORT}`);
-    console.log(`📸 Executing cross-device visual analysis rules...\n`);
+    console.log(`[ANTIGRAVITY VISION ENGINE]: Launching automated session on port ${PORT}...`);
 
     try {
         for (const viewport of VIEWPORTS) {
@@ -101,19 +109,20 @@ async function main() {
             const page = await context.newPage();
 
             // =========================================================================
-            // SCENARIO 1: Capture Default State (Parameter Entry Form)
+            // STATE 1: Parameter Form Entry View & Scrolling Audit
             // =========================================================================
             await page.goto(`http://localhost:${PORT}/`, { waitUntil: "networkidle" });
             await page.waitForTimeout(200);
 
-            const formPng = join(OUT_DIR, `workspace-inputs-${viewport.label}.png`);
-            await page.screenshot({ path: formPng, fullPage: true });
-            console.log(` ✅ Captured Form View: ${formPng}`);
+            console.log(`[AUDIT]: Inspecting Layout Grid Structure [${viewport.label.toUpperCase()}]`);
+            await feedImageToAgent(page, `Initial Parameter Form Screen - ${viewport.label}`);
+
+            await smoothlyScrollPage(page);
+            await feedImageToAgent(page, `Scrolled Input View Baseline Check - ${viewport.label}`);
 
             // =========================================================================
-            // SCENARIO 2: Capture Benign Report View (Via Network Interception)
+            // STATE 2: Mocked Benign Interface Assertion
             // =========================================================================
-            // Intercept the Axios post call to prevent dependency on whether the backend is up
             await page.route('**/predict', async (route) => {
                 await route.fulfill({
                     status: 200,
@@ -122,26 +131,19 @@ async function main() {
                 });
             });
 
-            // Submit the form to generate state change
             await page.click('button[type="submit"]');
-            await page.waitForTimeout(500); // Wait for transition animation to settle
+            await page.waitForTimeout(500);
 
-            const benignPng = join(OUT_DIR, `report-benign-${viewport.label}.png`);
-            await page.screenshot({ path: benignPng, fullPage: true });
-            console.log(` ✅ Captured Benign Evaluation: ${benignPng}`);
+            console.log(`[AUDIT]: Inspecting Benign Report Card [${viewport.label.toUpperCase()}]`);
+            await feedImageToAgent(page, `Benign Diagnostic Result Dashboard - ${viewport.label}`);
+            await smoothlyScrollPage(page);
 
-            if (viewport.label === "desktop") {
-                const benignPdf = join(OUT_DIR, `report-benign-document.pdf`);
-                await capturePdf(page, viewport, benignPdf);
-                console.log(` 📜 Generated Benign Medical PDF: ${benignPdf}`);
-            }
-
-            // Reset the application interface back to state 1
+            // Bulletproof click to reset form back to state 1
             await page.click('button:not([disabled])');
             await page.waitForTimeout(200);
 
             // =========================================================================
-            // SCENARIO 3: Capture Malignant Report View
+            // STATE 3: Mocked Malignant Interface Assertion
             // =========================================================================
             await page.route('**/predict', async (route) => {
                 await route.fulfill({
@@ -154,15 +156,16 @@ async function main() {
             await page.click('button[type="submit"]');
             await page.waitForTimeout(500);
 
-            const malignantPng = join(OUT_DIR, `report-malignant-${viewport.label}.png`);
-            await page.screenshot({ path: malignantPng, fullPage: true });
-            console.log(` ✅ Captured Malignant Evaluation: ${malignantPng}\n`);
+            console.log(`[AUDIT]: Inspecting Malignant Report Card [${viewport.label.toUpperCase()}]`);
+            await feedImageToAgent(page, `Malignant Diagnostic Result Dashboard - ${viewport.label}`);
+            await smoothlyScrollPage(page);
 
             await context.close();
         }
     } finally {
         await browser.close();
         server.close();
+        console.log(`[ANTIGRAVITY VISION ENGINE]: Session testing complete.`);
     }
 }
 

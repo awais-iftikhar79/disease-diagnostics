@@ -38,3 +38,51 @@ body,
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+@media print {
+  html, body, #root {
+    background-color: white !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+  .overflow-x-hidden {
+    overflow-x: visible !important;
+  }
+  
+  /* Strip all flex centering and massive paddings so the card prints at the very top */
+  main, .flex-1, .items-center.justify-center, .min-h-screen, .py-10, .py-6, .md\\:py-12 {
+    display: block !important;
+    height: auto !important;
+    min-height: auto !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+  }
+
+  #report-card {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+  }
+
+  header, button, .no-print {
+    display: none !important;
+  }
+  .shadow-xl, .shadow-sm, .shadow-md {
+    box-shadow: none !important;
+  }
+  .border {
+    border-color: #cbd5e1 !important;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}

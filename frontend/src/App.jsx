@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
-import { Activity, ShieldAlert, ShieldCheck, ChevronRight, FileText, Database, Microchip, RefreshCcw } from 'lucide-react';
+import { Activity, ShieldAlert, ShieldCheck, ChevronRight, FileText, Database, Microchip, RefreshCcw, Download, FileJson, FileSpreadsheet } from 'lucide-react';
 
 const FEATURE_NAMES = [
   'Radius', 'Texture', 'Perimeter', 'Area', 'Smoothness',
@@ -9,9 +9,9 @@ const FEATURE_NAMES = [
 
 export default function App() {
   const [formData, setFormData] = useState({
-    mean: Array(10).fill('0.0'),
-    se: Array(10).fill('0.0'),
-    worst: Array(10).fill('0.0')
+    mean: Array(10).fill(''),
+    se: Array(10).fill(''),
+    worst: Array(10).fill('')
   });
 
   const [isAnalyzed, setIsAnalyzed] = useState(false);
@@ -22,7 +22,7 @@ export default function App() {
   const handleInputChange = (category, index, value) => {
     // Only allow numbers and decimal points
     if (/[^0-9.]/.test(value) && value !== "") return;
-    
+
     // Check if there are multiple decimal points
     if ((value.match(/\./g) || []).length > 1) return;
 
@@ -105,10 +105,37 @@ export default function App() {
     setResult(null);
     setErrorMsg(null);
     setFormData({
-      mean: Array(10).fill('0.0'),
-      se: Array(10).fill('0.0'),
-      worst: Array(10).fill('0.0')
+      mean: Array(10).fill(''),
+      se: Array(10).fill(''),
+      worst: Array(10).fill('')
     });
+  };
+
+  const downloadCSV = () => {
+    const headers = FEATURE_NAMES.map(n => n.replace(/ /g, '_')).join(',');
+    const meanRow = formData.mean.join(',');
+    const seRow = formData.se.join(',');
+    const worstRow = formData.worst.join(',');
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + "Category," + headers + "\n"
+      + "Mean," + meanRow + "\n"
+      + "SE," + seRow + "\n"
+      + "Worst," + worstRow + "\n\n"
+      + "Diagnosis,Confidence,RiskLevel\n"
+      + `${result.diagnosis},${result.confidence}%,${result.riskLevel}\n`;
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "clinical_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadPDF = () => {
+    window.print();
   };
 
   const renderInputColumn = (title, category) => (
@@ -187,7 +214,7 @@ export default function App() {
                 </div>
               )}
 
-              <div className="flex justify-start pb-12">
+              <div className="flex justify-center pb-12">
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -209,26 +236,40 @@ export default function App() {
         ) : (
           <div className="animate-in fade-in slide-in-from-bottom-12 duration-700 flex-1 flex flex-col items-center justify-center py-6 md:py-12">
             <div className="w-full max-w-6xl mx-auto relative">
-              <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-12 shadow-xl relative overflow-hidden">
+              <div id="report-card" className="bg-white rounded-3xl border border-slate-200 p-6 md:p-12 print:p-4 shadow-xl relative overflow-hidden">
                 <div className="flex justify-between items-start mb-12">
                   <div>
                     <h3 className="text-sm md:text-base uppercase tracking-widest text-slate-500 font-semibold mb-1">Diagnostic Report</h3>
                     <p className="text-xs md:text-sm text-slate-400">Automated Patient Evaluation</p>
                   </div>
-                  <button
-                    onClick={resetForm}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium transition-colors"
-                  >
-                    <RefreshCcw className="w-4 h-4" />
-                    <span className="hidden sm:inline">New Analysis</span>
-                  </button>
+                  
+                  <div className="flex flex-col sm:flex-row items-center gap-3 no-print">
+                    <div className="flex bg-slate-100 rounded-lg p-1 border border-slate-200">
+                      <button onClick={downloadPDF} title="Download PDF" className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-blue-600 hover:bg-white rounded-md transition-colors">
+                        <FileText className="w-4 h-4" />
+                        <span>PDF</span>
+                      </button>
+                      <div className="w-px bg-slate-200 my-1 mx-1"></div>
+                      <button onClick={downloadCSV} title="Download CSV" className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-emerald-600 hover:bg-white rounded-md transition-colors">
+                        <FileSpreadsheet className="w-4 h-4" />
+                        <span>CSV</span>
+                      </button>
+                    </div>
+                    <button
+                      onClick={resetForm}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium transition-colors"
+                    >
+                      <RefreshCcw className="w-4 h-4" />
+                      <span className="hidden sm:inline">New Analysis</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-16 items-center">
+                <div className="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-2 gap-10 md:gap-16 print:gap-6 items-center">
                   {/* Left Column: Prediction & Circle */}
                   <div className="flex flex-col items-center text-center space-y-8">
                     <div className="relative flex items-center justify-center">
-                      <svg viewBox="0 0 256 256" className="w-48 h-48 md:w-64 md:h-64 transform -rotate-90">
+                      <svg viewBox="0 0 256 256" className="w-48 h-48 md:w-64 md:h-64 print:w-40 print:h-40 transform -rotate-90">
                         <circle
                           className="text-slate-100"
                           strokeWidth="12"
@@ -299,7 +340,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className={`border rounded-2xl p-5 md:p-8 ${result.diagnosis === 'MALIGNANT' ? 'bg-rose-50 border-rose-100' : 'bg-emerald-50 border-emerald-100'}`}>
+                    <div className={`border rounded-2xl p-5 md:p-8 print:p-4 ${result.diagnosis === 'MALIGNANT' ? 'bg-rose-50 border-rose-100' : 'bg-emerald-50 border-emerald-100'}`}>
                       <div className="flex items-center space-x-3 mb-3">
                         {result.diagnosis === 'MALIGNANT' ? (
                           <ShieldAlert className="w-6 h-6 text-rose-600" />
