@@ -193,10 +193,10 @@ export default function App() {
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-10 relative z-10 flex flex-col">
         {!isAnalyzed ? (
           <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 flex-1">
-            <div className="mb-10 w-full max-w-4xl">
+            <div className="mb-10 w-full max-w-4xl text-center mx-auto">
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">Breast Cancer Diagnostic System</h2>
               <p className="text-slate-600 text-base md:text-lg leading-relaxed">
-                Enter the 30 cell nuclei parameters from the digitized Fine Needle Aspirate (FNA) image. Our AI model will analyze the morphometric data to predict whether the tumor is benign or malignant.
+                Enter the 30 cell-feature values obtained from a Fine Needle Aspiration (FNA) sample. The model will analyze the measurements and predict whether the tumor is likely benign or malignant. This prediction is for decision-support purposes and should not be considered a medical diagnosis.
               </p>
             </div>
 
