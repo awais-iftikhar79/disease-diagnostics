@@ -2,6 +2,8 @@
 
 A comprehensive, full-stack machine learning application designed to aid in the preliminary diagnosis of breast cancer. This system integrates a highly-responsive React frontend with a high-performance FastAPI Python backend running advanced predictive models.
 
+**🌐 Live Demo:** [https://disease-diagnostics.vercel.app/](https://disease-diagnostics.vercel.app/)
+
 ## 🚀 Features
 
 - **High-Fidelity User Interface**: A professional, responsive, full-width UI built with React and Tailwind CSS. Features an intuitive 3-column grid input layout for cellular metrics (Mean, SE, Worst).
