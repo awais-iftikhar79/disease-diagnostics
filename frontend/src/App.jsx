@@ -73,7 +73,7 @@ export default function App() {
     try {
       const features = allFeatures.map(v => parseFloat(v));
 
-      const response = await axios.post('http://localhost:8000/predict', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/predict`, {
         features: features
       });
 
