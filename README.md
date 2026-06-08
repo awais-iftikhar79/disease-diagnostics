@@ -1,6 +1,6 @@
-# OmniHealth Disease Diagnostics - Breast Cancer Detection
+# MedAI Diagnostic - Breast Cancer Detection
 
-A comprehensive, full-stack machine learning application designed to aid in the preliminary diagnosis of breast cancer. This system integrates a highly-responsive, "Deep Midnight" React frontend with a high-performance FastAPI Python backend running advanced predictive models.
+A comprehensive, full-stack machine learning application designed to aid in the preliminary diagnosis of breast cancer. This system integrates a highly-responsive React frontend with a high-performance FastAPI Python backend running advanced predictive models.
 
 ## 🚀 Features
 
@@ -14,7 +14,7 @@ A comprehensive, full-stack machine learning application designed to aid in the 
 
 ### Frontend
 - **Framework**: React.js (via Vite)
-- **Styling**: Tailwind CSS (Deep Midnight Theme)
+- **Styling**: Tailwind CSS
 - **Tooling**: ESLint, PostCSS
 
 ### Backend
@@ -90,6 +90,3 @@ python -m pytest -v
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
 4. Push to the branch (`git push origin feature/AmazingFeature`).
 5. Open a Pull Request.
-
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for more information.
